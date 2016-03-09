@@ -17,8 +17,12 @@ library(ggplot2)
 library(dplyr)
 library(data.table)
 library(tidyr)
+library(knitr)
 ## loading for US State Facts and Figures
 library(datasets)
+
+## output wider graphs
+opts_chunk$set(out.width='750px', dpi=200)
 
 if (!file.exists("./data")) {
     dir.create("./data")
