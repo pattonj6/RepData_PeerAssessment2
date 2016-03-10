@@ -23,7 +23,7 @@ library(datasets)
 
 ## output wider graphs
 ##opts_chunk$set(dev = 'png')
-opts_chunk$set(out.width='900px', dpi=200)
+opts_chunk$set(out.width='900px',out.height = '650px', dpi=200)
 
 if (!file.exists("./data")) {
     dir.create("./data")
@@ -53,10 +53,14 @@ Let's start to explore the data in the columns, here are some basic questions I 
 
 ```{r, echo=TRUE}
 length(unique(data$EVTYPE)) -> disaster.type.count
+print(disaster.type.count)
 range(data$FATALITIES) -> max.death.count
+print(max.death.count)
 range(data$INJURIES) -> max.injury.count
+print(max.injury.count)
 
 length(unique(data$STATE)) -> states.impacted.count
+print(states.impacted.count)
 unique(data$STATE) -> states.impacted
 setdiff(states.impacted, state.abb) -> impacted.outside.50.states
 ```
@@ -233,7 +237,7 @@ dt_data_econ <- dt_data_w_exp_rows_removed[ ,.(sum.property=sum(prop.damage.tota
 dt_data_econ
 ```
 
-I'd like to plot all of the property, crop, and combined data on the same plot, so I need to tidy the data.  Data is ordered by sum.prop.or.crop.  I know it is going to deprecate my duplicate levels, this is ok for this plot.
+I'd like to plot all of the property, crop, and combined data on the same plot, so I need to tidy the data.  Data is ordered by sum.prop.and.crop.  I know it is going to deprecate my duplicate levels, this is ok for this plot.
 
 ```{r, echo=TRUE}
 dt_data_econ %>% gather(type, count, -EVTYPE) -> tidy.econ.data

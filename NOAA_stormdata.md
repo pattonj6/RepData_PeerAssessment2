@@ -2,7 +2,7 @@
 
 ## Synopsis
 
-In this report we are analyzing the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database.  The database has tracking for events in the US 50 states as well as 22 other locations like US territorities  (e.g. Guam, American Samoa).  Tornados, heat, and wind are the top 3 events that measured the highest number of combined injuries + fatalities.  We combined injuries and fatalities into a single metric to determine the ranking.  Extreme heat-related events appear to 
+In this report we are analyzing the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database.  The database has tracking for events in the US 50 states as well as 22 other locations like US territorities  (e.g. Guam, American Samoa) which will be ignored for this analysis.  Tornados, heat, and thunderstorm (TSTM) wind are the top 3 injury and death events over the measured 61 year period.  Interestingly, the average number of injuries and average fatalities for all "heat-related" events and hurricane/typhoon stand out above the baseline data.  This means that on average, when these events occur, they injure or kill more people than even tornados.  
 
 ## Loading and Processing the Data
 
@@ -61,8 +61,8 @@ library(knitr)
 library(datasets)
 
 ## output wider graphs
-opts_chunk$set(dev = 'png')
-##opts_chunk$set(out.width='750px', dpi=200)
+##opts_chunk$set(dev = 'png')
+opts_chunk$set(out.width='900px',out.height = '650px', dpi=200)
 
 if (!file.exists("./data")) {
     dir.create("./data")
@@ -271,10 +271,41 @@ Let's start to explore the data in the columns, here are some basic questions I 
 
 ```r
 length(unique(data$EVTYPE)) -> disaster.type.count
-range(data$FATALITIES) -> max.death.count
-range(data$INJURIES) -> max.injury.count
+print(disaster.type.count)
+```
 
+```
+## [1] 985
+```
+
+```r
+range(data$FATALITIES) -> max.death.count
+print(max.death.count)
+```
+
+```
+## [1]   0 583
+```
+
+```r
+range(data$INJURIES) -> max.injury.count
+print(max.injury.count)
+```
+
+```
+## [1]    0 1700
+```
+
+```r
 length(unique(data$STATE)) -> states.impacted.count
+print(states.impacted.count)
+```
+
+```
+## [1] 72
+```
+
+```r
 unique(data$STATE) -> states.impacted
 setdiff(states.impacted, state.abb) -> impacted.outside.50.states
 ```
@@ -420,9 +451,9 @@ a <- ggplot(dt_data_sums, aes(log(sum.fatal.or.injure), reorder(EVTYPE,sum.fatal
 print(a)
 ```
 
-![](NOAA_stormdata_files/figure-html/unnamed-chunk-7-1.png) 
+<img src="NOAA_stormdata_files/figure-html/unnamed-chunk-7-1.png" title="" alt="" width="900px" height="650px" />
 
-Tornado (by an order of magnitude), Excessive Heat, and TSTM Wind are the top 3 injury and fatality events, since 1950.  I'd like to plot all of the injury, fatality, and average data on the same plot, so I need to tidy the data.  Data is ordered by sum.fatal.or.injure.  I know it is going to deprecate my duplicate levels, this is ok for this plot.
+Tornado (by an order of magnitude), Excessive Heat, and thunderstorm (TSTM) Wind are the top 3 injury and fatality events, since 1950.  I'd like to plot all of the injury, fatality, and average data on the same plot, so I need to tidy the data.  Data is ordered by sum.fatal.or.injure.  I know it is going to deprecate my duplicate levels, this is ok for this plot.
 
 
 ```r
@@ -456,7 +487,7 @@ print(b)
 ## else paste0(labels, : duplicated levels in factors are deprecated
 ```
 
-![](NOAA_stormdata_files/figure-html/unnamed-chunk-9-1.png) 
+<img src="NOAA_stormdata_files/figure-html/unnamed-chunk-9-1.png" title="" alt="" width="900px" height="650px" />
 
 I love this dot plot!  Clearly, tornado by itself is on top for the total historical sum.fatal.or.injure metric.  However, if you study the avg.injuries(blue) and avg.fatalities(green) dots you'll see that all "heat" categories and hurricane/typhoon stand out above the baseline data.  ("Glaze"" and "Wild Fires" also show elevated levels from baseline, but further down the chart.) This means that on average, when these events occur, they injure or kill more people than even tornados.  But since 1950, tornados have injured or killed a larger total, likely do to a few signficantly bad events.
 
@@ -734,7 +765,7 @@ dt_data_econ
 ##         avg.crop sum.prop.and.crop
 ```
 
-I'd like to plot all of the property, crop, and combined data on the same plot, so I need to tidy the data.  Data is ordered by sum.prop.or.crop.  I know it is going to deprecate my duplicate levels, this is ok for this plot.
+I'd like to plot all of the property, crop, and combined data on the same plot, so I need to tidy the data.  Data is ordered by sum.prop.and.crop.  I know it is going to deprecate my duplicate levels, this is ok for this plot.
 
 
 ```r
@@ -769,6 +800,6 @@ print(b)
 ## else paste0(labels, : duplicated levels in factors are deprecated
 ```
 
-![](NOAA_stormdata_files/figure-html/unnamed-chunk-19-1.png) 
+<img src="NOAA_stormdata_files/figure-html/unnamed-chunk-19-1.png" title="" alt="" width="900px" height="650px" />
 
-Top 3 for economic impact are flood, hurrican/typhoon, and tornado.  Interesting to note that the majority of economic loss is in property, evidenced by the overlap of red(sum.property) and pink(sum.prop.and.crop) datapoints for most events.  Temperature related events (drought, extreme heat/cold, frost) all show higher crop damage than property damage - this intuitively makes sense.  The catastropic events like flood, hurricane/typhoon, tornados are the ones that cause large property damage.
+Top 3 for economic impact are: 1)flood, 2)hurrican/typhoon, and 3) tornado.  Interesting to note that the majority of economic loss is in property, evidenced by the overlap of red(sum.property) and pink(sum.prop.and.crop) datapoints for most events.  Temperature related events (drought, extreme heat/cold, frost) all show higher crop damage than property damage - this intuitively makes sense.  The catastropic events like flood, hurricane/typhoon, tornados are the ones that cause the largest property damage.
