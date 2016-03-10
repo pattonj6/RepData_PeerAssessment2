@@ -15,10 +15,10 @@ The top 3 economic impact events are: flood, hurricane/typhoon, and tornado. Dat
 
 ## Data Processing
 
-```{r setup, cache=FALSE, include=FALSE}
+```{r setup, cache=FALSE, echo=TRUE}
 library(knitr)
 output <- opts_knit$get("rmarkdown.pandoc.to")
-if (output=="html") opts_chunk$set(fig.width=11, fig.height=11)
+if (output=="html") opts_chunk$set(fig.width=10, fig.height=10)
 if (output=="docx") opts_chunk$set(fig.width=6,  fig.height=6)
 ```
 
@@ -30,9 +30,6 @@ library(data.table)
 library(tidyr)
 ## loading for US State Facts and Figures
 library(datasets)
-
-## output taller and wider graphs in knitr
-## opts_chunk$set(out.width='900px',out.height = '650px', dpi=200)
 
 if (!file.exists("./data")) {
     dir.create("./data")
@@ -90,7 +87,7 @@ sum(is.na(dt_data$FATALITIES))
 
 There are no NA rows....good!
 
-### Health impact analysis
+#### Health impact analysis
 
 Calculate: 1) Remove non-US states.  Keep Washington, DC. 2) The total sum and averages of deaths and injuries by event type. 3) Also calculate a total sum of fatal+injure by event type.
 
@@ -141,7 +138,7 @@ I love this dot plot!  Clearly, tornado by itself is on top for the total histor
 
 Top priority would be placed on tornados, heat, and hurricane/typhoons.  I suspect heat would jump to the top of the list if we combined all 4 "heat" categories into a single line item.  (If I wasn't limited to 3 figures I would do this analysis!)
 
-### Economic Impact Analysis
+#### Economic Impact Analysis
 
 Calculate: 1) Total sum and average values using PROPDMG and CROPDMG columns by event type.  Even though CROPDMG is a separate column, I still consider it a direct economic impact event and can be combined with PROPDMG to examine overall economic impact. 2) Remove non-US states and rows with incorrect "EXP" sympols or values.
 
