@@ -4,11 +4,13 @@
 
 In this report we are analyzing the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database.  The database has tracking for events in the US 50 states as well as 22 other locations like US territorities  (e.g. Guam, American Samoa) which will be ignored for this analysis.  
 
-Tornados, heat, and thunderstorm (TSTM) wind are the top 3 injury and death events over the measured 61 year period.  Interestingly, the average number of injuries and average fatalities for all "heat-related" events and hurricane/typhoon stand out above the baseline data.  This means that on average, when these events occur, they injure or kill more people than even tornados.
+Tornados, heat, and thunderstorm (TSTM) wind are the top 3 total injury plus death events over the measured 61 year period.  Interestingly, the average number of injuries and average fatalities for all "heat-related" events and hurricane/typhoon stand out above the baseline data.  This means that on average, when these events occur, they injure or kill more people than even tornados.
 
 The top 3 economic impact events are: flood, hurricane/typhoon, and tornado. Data shows that the majority of economic loss is in property.  Temperature related events (drought, extreme heat/cold, frost) all show higher crop damage than property damage - this intuitively makes sense. The catastropic events like flood, hurricane/typhoon, tornados are the ones that cause the largest property damage.
 
 ## Data Processing
+
+
 
 
 ```r
@@ -60,12 +62,11 @@ library(tidyr)
 ```
 
 ```r
-library(knitr)
 ## loading for US State Facts and Figures
 library(datasets)
 
 ## output taller and wider graphs in knitr
-opts_chunk$set(out.width='900px',out.height = '650px', dpi=200)
+## opts_chunk$set(out.width='900px',out.height = '650px', dpi=200)
 
 if (!file.exists("./data")) {
     dir.create("./data")
@@ -341,7 +342,7 @@ sum(is.na(dt_data$FATALITIES))
 
 There are no NA rows....good!
 
-# Health impact analysis
+### Health impact analysis
 
 Calculate: 1) Remove non-US states.  Keep Washington, DC. 2) The total sum and averages of deaths and injuries by event type. 3) Also calculate a total sum of fatal+injure by event type.
 
@@ -462,7 +463,7 @@ a <- ggplot(dt_data_sums, aes(log(sum.fatal.or.injure), reorder(EVTYPE,sum.fatal
 print(a)
 ```
 
-<img src="NOAA_stormdata_files/figure-html/unnamed-chunk-7-1.png" title="" alt="" width="900px" height="650px" />
+![](NOAA_stormdata_files/figure-html/unnamed-chunk-7-1.png) 
 
 Tornado (by an order of magnitude), excessive heat, and thunderstorm (TSTM) wind are the top 3 injury and fatality events, since 1950.  I'd like to plot all of the injury, fatality, and average data on the same plot, so I need to tidy the data.  Data is ordered by sum.fatal.or.injure.  I know it is going to deprecate my duplicate levels, this is ok for this plot.
 
@@ -498,13 +499,13 @@ print(b)
 ## else paste0(labels, : duplicated levels in factors are deprecated
 ```
 
-<img src="NOAA_stormdata_files/figure-html/unnamed-chunk-9-1.png" title="" alt="" width="900px" height="650px" />
+![](NOAA_stormdata_files/figure-html/unnamed-chunk-9-1.png) 
 
 I love this dot plot!  Clearly, tornado by itself is on top for the total historical sum.fatal.or.injure metric.  However, if you study the avg.injuries(blue) and avg.fatalities(olive green) dots you'll see that all "heat" categories and hurricane/typhoon stand out above the baseline data.  ("Glaze"" and "Wild Fires" also show elevated levels from baseline, but further down the chart.) This means that on average, when these events occur, they injure or kill more people than even tornados.  But since 1950, tornados have injured or killed a larger total, likely do to a few signficantly bad events.
 
 Top priority would be placed on tornados, heat, and hurricane/typhoons.  I suspect heat would jump to the top of the list if we combined all 4 "heat" categories into a single line item.  (If I wasn't limited to 3 figures I would do this analysis!)
 
-## Economic Impact Analysis
+### Economic Impact Analysis
 
 Calculate: 1) Total sum and average values using PROPDMG and CROPDMG columns by event type.  Even though CROPDMG is a separate column, I still consider it a direct economic impact event and can be combined with PROPDMG to examine overall economic impact. 2) Remove non-US states and rows with incorrect "EXP" sympols or values.
 
@@ -825,6 +826,6 @@ print(b)
 ## else paste0(labels, : duplicated levels in factors are deprecated
 ```
 
-<img src="NOAA_stormdata_files/figure-html/unnamed-chunk-19-1.png" title="" alt="" width="900px" height="650px" />
+![](NOAA_stormdata_files/figure-html/unnamed-chunk-19-1.png) 
 
 Top 3 for economic impact are: 1)flood, 2)hurricane/typhoon, and 3) tornado.  Interesting to note that the majority of economic loss is in property, evidenced by the overlap of red(sum.property) and pink(sum.prop.and.crop) datapoints for most events.  Temperature related events (drought, extreme heat/cold, frost) all show higher crop damage(green) than property damage(red) - this intuitively makes sense.  The catastropic events like flood, hurricane/typhoon, tornados are the ones that cause the largest property damage.
