@@ -7,7 +7,7 @@ output:
 
 ## Synopsis
 
-In this report we are analyzing the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database.  The database has tracking for events in the US 50 states as well as 22 other locations like US territorities  (e.g. Guam, American Samoa).  Tornados, heat, and wind are the top 3 events that measured the highest number of combined injuries + fatalities.  We combined injuries and fatalities into a single metric to determine the ranking.  Extreme heat-related events appear to 
+In this report we are analyzing the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database.  The database has tracking for events in the US 50 states as well as 22 other locations like US territorities  (e.g. Guam, American Samoa) which will be ignored for this analysis.  Tornados, heat, and thunderstorm (TSTM) wind are the top 3 injury and death events over the measured 61 year period.  Interestingly, the average number of injuries and average fatalities for all "heat-related" events and hurricane/typhoon stand out above the baseline data.  This means that on average, when these events occur, they injure or kill more people than even tornados.  
 
 ## Loading and Processing the Data
 
@@ -22,7 +22,8 @@ library(knitr)
 library(datasets)
 
 ## output wider graphs
-opts_chunk$set(out.width='750px', dpi=200)
+##opts_chunk$set(dev = 'png')
+opts_chunk$set(out.width='900px', dpi=200)
 
 if (!file.exists("./data")) {
     dir.create("./data")
@@ -88,17 +89,18 @@ impacted.outside.50.states.no.DC <- impacted.outside.50.states[!impacted.outside
 dt_data_nonUS_removed <- dt_data[which(!dt_data$STATE %in% 
                                            impacted.outside.50.states.no.DC),]
 
-dt_data_sums <- dt_data_nonUS_removed[ ,.(sum.fatalities=sum(FATALITIES), avg.fatalities=mean(FATALITIES),
+dt_data_sums <- dt_data_nonUS_removed[,.(sum.fatalities=sum(FATALITIES),
+                                         avg.fatalities=mean(FATALITIES),
                                           sum.injuries=sum(INJURIES), avg.injuries=mean(INJURIES),
                                           sum.fatal.or.injure=sum(FATALITIES,INJURIES)),
                                        by=EVTYPE][order(-sum.fatal.or.injure)][sum.fatal.or.injure >= 100]
+
+dt_data_sums
 ```
 
-I filtered out rows of data < 100 combined injuries or fatalities.  There are misspelled EVTYPE labels 
-and lables that don't all fit into 1 common heading, so end up as a separate observation with 
-no injuries or fatalities.  A perfect data set would combine in these misspelled EVTYPE labels
-and other categories so that averages are correctly counted.  I am going to ignore this consolidation work
-for this exercise.
+I filtered out rows of data < 100 combined injuries or fatalities.  
+There are misspelled EVTYPE labels and lables that don't all fit into 1 common heading, 
+so end up as a separate observation with no injuries or fatalities.  A perfect data set would combine in these misspelled EVTYPE labels and other categories so that averages are correctly counted.  I am going to ignore this consolidation work for this exercise.
 
 Let's take a look at the sum.fatal.or.injure in dot plot format.  I chose this since EVTYPE is a long discrete list, and I want to see the overall ranking in easy-to-read labels.
 
@@ -108,7 +110,7 @@ a <- ggplot(dt_data_sums, aes(log(sum.fatal.or.injure), reorder(EVTYPE,sum.fatal
 print(a)
 ```
 
-Tornado (by 2.5x orders of magnitude), Excessive Heat, and TSTM Wind are the top 3 injury and fatality events, since 1950.  I'd like to plot all of the injury, fatality, and average data on the same plot, so I need to tidy the data.  Data is ordered by sum.fatal.or.injure.  I know it is going to deprecate my duplicate levels, this is ok for this plot.
+Tornado (by an order of magnitude), Excessive Heat, and thunderstorm (TSTM) Wind are the top 3 injury and fatality events, since 1950.  I'd like to plot all of the injury, fatality, and average data on the same plot, so I need to tidy the data.  Data is ordered by sum.fatal.or.injure.  I know it is going to deprecate my duplicate levels, this is ok for this plot.
 
 ```{r, echo=TRUE}
 dt_data_sums %>% gather(type, count, -EVTYPE) -> tidy.data
@@ -120,6 +122,7 @@ tidy.data$EVTYPE <- factor(tidy.data$EVTYPE, levels = nameorder)
 b <- ggplot(tidy.data, aes(count, EVTYPE)) + 
     geom_point(size=4, aes(colour=type)) +
     scale_x_log10() +
+    theme(legend.position="bottom") +
     ggtitle("storm event versus injury/fatality")
 print(b)
 ```
@@ -130,9 +133,7 @@ Top priority would be placed on tornados, heat, and hurricane/typhoons.  I suspe
 
 ## Economic Impact Analysis
 
-Calculate:
---Total sum and average values using PROPDMG and CROPDMG columns by event type.  Even though CROPDMG is a separate column, I still consider it a direct economic impact event and can be combined with PROPDMG to examine overall economic impact. 
---Remove non-US states and rows with incorrect "EXP" sympols or values.
+Calculate: 1) Total sum and average values using PROPDMG and CROPDMG columns by event type.  Even though CROPDMG is a separate column, I still consider it a direct economic impact event and can be combined with PROPDMG to examine overall economic impact. 2) Remove non-US states and rows with incorrect "EXP" sympols or values.
 
 ```{r, echo=TRUE}
 range(dt_data_nonUS_removed$PROPDMG) -> prop.damage.range
@@ -228,6 +229,8 @@ dt_data_econ <- dt_data_w_exp_rows_removed[ ,.(sum.property=sum(prop.damage.tota
                                          avg.crop=mean(crop.damage.total), 
                                          sum.prop.and.crop=sum(damage.total)),
                                       by=EVTYPE][order(-sum.prop.and.crop)][sum.prop.and.crop >100000000]
+
+dt_data_econ
 ```
 
 I'd like to plot all of the property, crop, and combined data on the same plot, so I need to tidy the data.  Data is ordered by sum.prop.or.crop.  I know it is going to deprecate my duplicate levels, this is ok for this plot.
@@ -243,8 +246,9 @@ b <- ggplot(tidy.econ.data, aes(count, EVTYPE)) +
     geom_point(size=4, aes(colour=type)) +
     scale_x_log10() + 
     xlab("US dollar amount") +
+    theme(legend.position="bottom") +
     ggtitle("storm event vs. property/crop damage loss ($)")
 print(b)
 ```
 
-Top 3 for economic impact are flood, hurrican/typhoon, and tornado.  Interesting to note that the majority of economic loss is in property, evidenced by the overlap of red(sum.property) and pink(sum.prop.and.crop) datapoints for most events.  Temperature related events (drought, extreme heat/cold, frost) all show higher crop damage than property damage - this intuitively makes sense.  The catastropic events like flood, hurricane/typhoon, tornados are the ones that cause large property damage.
+Top 3 for economic impact are: 1)flood, 2)hurrican/typhoon, and 3) tornado.  Interesting to note that the majority of economic loss is in property, evidenced by the overlap of red(sum.property) and pink(sum.prop.and.crop) datapoints for most events.  Temperature related events (drought, extreme heat/cold, frost) all show higher crop damage than property damage - this intuitively makes sense.  The catastropic events like flood, hurricane/typhoon, tornados are the ones that cause the largest property damage.
