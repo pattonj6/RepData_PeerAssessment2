@@ -63,7 +63,7 @@ dt_data_sums <- dt_data[ ,.(sum.fatalities=sum(FATALITIES), avg.fatalities=mean(
 ## for this exercise, and only focus on the top most health harmful events.
 
 a <- ggplot(dt_data_sums, aes(log(sum.fatal.or.injure), reorder(EVTYPE,sum.fatal.or.injure))) +
-                geom_point(size=3)
+                geom_dotplot(size=3)
 print(a)
 
 ## I'd like to plot all of the data on the same plot, so I need to tidy the data.

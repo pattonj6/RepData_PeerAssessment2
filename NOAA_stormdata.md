@@ -11,12 +11,6 @@ The top 3 economic impact events are: flood, hurricane/typhoon, and tornado. Dat
 ## Data Processing
 
 
-```r
-library(knitr)
-output <- opts_knit$get("rmarkdown.pandoc.to")
-if (output=="html") opts_chunk$set(fig.width=10, fig.height=10)
-if (output=="docx") opts_chunk$set(fig.width=6,  fig.height=6)
-```
 
 
 ```r
@@ -28,15 +22,21 @@ library(dplyr)
 ```
 ## 
 ## Attaching package: 'dplyr'
-## 
+```
+
+```
 ## The following objects are masked from 'package:lubridate':
 ## 
 ##     intersect, setdiff, union
-## 
+```
+
+```
 ## The following objects are masked from 'package:stats':
 ## 
 ##     filter, lag
-## 
+```
+
+```
 ## The following objects are masked from 'package:base':
 ## 
 ##     intersect, setdiff, setequal, union
@@ -49,11 +49,15 @@ library(data.table)
 ```
 ## 
 ## Attaching package: 'data.table'
-## 
+```
+
+```
 ## The following objects are masked from 'package:dplyr':
 ## 
 ##     between, last
-## 
+```
+
+```
 ## The following objects are masked from 'package:lubridate':
 ## 
 ##     hour, mday, month, quarter, wday, week, yday, year
@@ -61,15 +65,11 @@ library(data.table)
 
 ```r
 library(tidyr)
-```
-
-```
-## Warning: package 'tidyr' was built under R version 3.2.3
-```
-
-```r
 ## loading for US State Facts and Figures
 library(datasets)
+
+## output taller and wider graphs in knitr
+## opts_chunk$set(out.width='900px',out.height = '650px', dpi=200)
 
 if (!file.exists("./data")) {
     dir.create("./data")
@@ -345,7 +345,7 @@ sum(is.na(dt_data$FATALITIES))
 
 There are no NA rows....good!
 
-#### Health impact analysis
+### Health impact analysis
 
 Calculate: 1) Remove non-US states.  Keep Washington, DC. 2) The total sum and averages of deaths and injuries by event type. 3) Also calculate a total sum of fatal+injure by event type.
 
@@ -466,7 +466,7 @@ a <- ggplot(dt_data_sums, aes(log(sum.fatal.or.injure), reorder(EVTYPE,sum.fatal
 print(a)
 ```
 
-![](NOAA_stormdata_files/figure-html/unnamed-chunk-7-1.png) 
+![](NOAA_stormdata_files/figure-html/unnamed-chunk-7-1.png)
 
 Tornado (by an order of magnitude), excessive heat, and thunderstorm (TSTM) wind are the top 3 injury and fatality events, since 1950.  I'd like to plot all of the injury, fatality, and average data on the same plot, so I need to tidy the data.  Data is ordered by sum.fatal.or.injure.  I know it is going to deprecate my duplicate levels, this is ok for this plot.
 
@@ -486,6 +486,8 @@ tidy.data$EVTYPE <- factor(tidy.data$EVTYPE, levels = nameorder)
 ```r
 b <- ggplot(tidy.data, aes(count, EVTYPE)) + 
     geom_point(size=3, aes(colour=type)) +
+         scale_colour_discrete(breaks=c("avg.fatalities", "avg.injuries", "sum.fatalities",
+                                      "sum.injuries", "sum.fatal.or.injure")) +
     scale_x_log10() +
     theme(legend.position="bottom") +
     ggtitle("storm event versus injury/fatality")
@@ -495,20 +497,18 @@ print(b)
 ```
 ## Warning in `levels<-`(`*tmp*`, value = if (nl == nL) as.character(labels)
 ## else paste0(labels, : duplicated levels in factors are deprecated
-```
 
-```
 ## Warning in `levels<-`(`*tmp*`, value = if (nl == nL) as.character(labels)
 ## else paste0(labels, : duplicated levels in factors are deprecated
 ```
 
-![](NOAA_stormdata_files/figure-html/unnamed-chunk-9-1.png) 
+![](NOAA_stormdata_files/figure-html/unnamed-chunk-9-1.png)
 
-I love this dot plot!  Clearly, tornado by itself is on top for the total historical sum.fatal.or.injure metric.  However, if you study the avg.injuries(blue) and avg.fatalities(olive green) dots you'll see that all "heat" categories and hurricane/typhoon stand out above the baseline data.  ("Glaze"" and "Wild Fires" also show elevated levels from baseline, but further down the chart.) This means that on average, when these events occur, they injure or kill more people than even tornados.  But since 1950, tornados have injured or killed a larger total, likely do to a few signficantly bad events.
+I love this dot plot!  Clearly, tornado by itself is on top for the total historical sum.fatal.or.injure metric.  However, if you study the avgerage injuries (olive green) and avgerage fatalities (red) dots you'll see that all "heat" categories and hurricane/typhoon stand out above the baseline data.  ("Glaze"" and "Wild Fires" also show elevated levels from baseline, but further down the chart.) This means that on average, when these events occur, they injure or kill more people than even tornados.  But since 1950, tornados have injured or killed a larger total, likely do to a few signficantly bad events.
 
-Top priority would be placed on tornados, heat, and hurricane/typhoons.  I suspect heat would jump to the top of the list if we combined all 4 "heat" categories into a single line item.  (If I wasn't limited to 3 figures I would do this analysis!)
+Top priority would be placed on tornados, heat, and hurricane/typhoons.  I suspect heat would jump to the top of the list if we combined all 4 "heat" categories into a single line item.
 
-#### Economic Impact Analysis
+### Economic Impact Analysis
 
 Calculate: 1) Total sum and average values using PROPDMG and CROPDMG columns by event type.  Even though CROPDMG is a separate column, I still consider it a direct economic impact event and can be combined with PROPDMG to examine overall economic impact. 2) Remove non-US states and rows with incorrect "EXP" sympols or values.
 
@@ -813,6 +813,8 @@ tidy.econ.data$EVTYPE <- factor(tidy.econ.data$EVTYPE, levels = nameorder)
 b <- ggplot(tidy.econ.data, aes(count, EVTYPE)) + 
     geom_point(size=3, aes(colour=type)) +
     scale_x_log10() + 
+         scale_color_discrete(breaks=c("avg.crop", "avg.property", "sum.crop", 
+                                       "sum.property", "sum.prop.and.crop")) +
     xlab("US dollar amount") +
     theme(legend.position="bottom") +
     ggtitle("storm event vs. property/crop damage loss ($)")
@@ -822,13 +824,11 @@ print(b)
 ```
 ## Warning in `levels<-`(`*tmp*`, value = if (nl == nL) as.character(labels)
 ## else paste0(labels, : duplicated levels in factors are deprecated
-```
 
-```
 ## Warning in `levels<-`(`*tmp*`, value = if (nl == nL) as.character(labels)
 ## else paste0(labels, : duplicated levels in factors are deprecated
 ```
 
-![](NOAA_stormdata_files/figure-html/unnamed-chunk-19-1.png) 
+![](NOAA_stormdata_files/figure-html/unnamed-chunk-19-1.png)
 
-Top 3 for economic impact are: 1)flood, 2)hurricane/typhoon, and 3) tornado.  Interesting to note that the majority of economic loss is in property, evidenced by the overlap of red(sum.property) and pink(sum.prop.and.crop) datapoints for most events.  Temperature related events (drought, extreme heat/cold, frost) all show higher crop damage(green) than property damage(red) - this intuitively makes sense.  The catastropic events like flood, hurricane/typhoon, tornados are the ones that cause the largest property damage.
+The top 3 economic impact over the measured 61 years are: 1) flood, 2) hurricane/typhoon, and 3)  tornado.  It is interesting to note that the majority of economic loss is in property, evidenced by the overlap of the sum.property (pink) and sum.prop.and.crop (blue) datapoints for most events.  Temperature related events (drought, extreme heat/cold, frost) all show higher total crop damage (green) than total property damage (pink) - this intuitively makes sense.  The catastropic events like flood, hurricane/typhoon, tornados are the events that cause the largest property damage.
